@@ -61,11 +61,11 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-  A[Client request] --> G1{GeoIP filter}
-  G1 -->|Blocked| Z1[Respond with configured block code]
-  G1 -->|Allowed| B{IP filter}
-  B -->|Blocked| Z1
-  B -->|Allowed| C{User-Agent filter}
+  A[Client request] --> B{IP filter}
+  B -->|Blocked| Z1[Respond with configured block code]
+  B -->|Allowed| G1{GeoIP filter}
+  G1 -->|Blocked| Z1
+  G1 -->|Allowed| C{User-Agent filter}
   C -->|Blocked| Z1
   C -->|Allowed| D{Rate limiting}
   D -->|Global limiter hit| Z2[Return 429 with limit headers]
