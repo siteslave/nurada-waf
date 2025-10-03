@@ -31,6 +31,47 @@
   - `api.config.docker.yaml` → `api.config.yaml`
 - และอัปเดตการอ้างอิงในเครื่องมือ/คำสั่งให้ตรงกับชื่อใหม่ (เช่น docker-compose หรือ path ที่ mount เข้าคอนเทนเนอร์)
 
+## แผนภาพภาพรวม (Mermaid)
+
+```mermaid
+flowchart LR
+  A[Attacker] --> W
+
+  subgraph S[WAF & Internal Services]
+    direction TB
+    W[WAF (Core)]
+    ML[ML Service]
+    W <--> ML
+  end
+
+  W --> H1[Host: /]
+  W --> H2[Host: /api]
+  W --> H3[Host: /services]
+```
+
+## แผนภาพการทำงานของ WAF
+
+```mermaid
+flowchart TD
+  A[Client request] --> B{IP filter}
+  B -->|Blocked| Z1[Respond with configured block code]
+  B -->|Allowed| C{User-Agent filter}
+  C -->|Blocked| Z1
+  C -->|Allowed| D{Rate limiting}
+  D -->|Global limiter hit| Z2[Return 429 with limit headers]
+  D -->|Per-route limiter hit| Z2
+  D -->|Allowed| E{Path traversal protection}
+  E -->|Violation| Z1
+  E -->|Allowed| F{XSS protection}
+  F -->|Violation| Z1
+  F -->|Allowed| G{SQLi protection}
+  G -->|Violation| Z1
+  G -->|Allow| H[Forward to matched upstream]
+  Z1 -->|Audited via log_blocked_event| I[Structured security logs]
+  Z2 -->|429 response + logging| I
+  H --> I
+```
+
 ## โครงสร้างโฟลเดอร์
 
 - `certs/` ใบรับรองและกุญแจ TLS สำหรับใช้งาน HTTPS (มีสคริปต์ช่วยสร้างใน `scripts/`)
