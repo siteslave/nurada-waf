@@ -45,9 +45,16 @@ flowchart LR
     ML -. feedback .-> W
   end
 
-  W --> H1[Host: /]
-  W --> H2[Host: /api]
-  W --> H3[Host: /services]
+  subgraph T[Application Hosts]
+    direction LR
+    H1[Host: /]
+    H2[Host: /api]
+    H3[Host: /services]
+  end
+
+  W -->|route /| H1
+  W -->|route /api| H2
+  W -->|route /services| H3
 ```
 
 ## แผนภาพการทำงานของ WAF
