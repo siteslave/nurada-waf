@@ -71,11 +71,11 @@ flowchart TD
   D -->|Global limiter hit| Z2[Return 429 with limit headers]
   D -->|Per-route limiter hit| Z2
   D -->|Allowed| E{Path traversal protection}
-  E -->|Violation| Z1
+  E -->|Blocked| Z1
   E -->|Allowed| F{XSS protection}
-  F -->|Violation| Z1
+  F -->|Blocked| Z1
   F -->|Allowed| G{SQLi protection}
-  G -->|Violation| Z1
+  G -->|Blocked| Z1
   G -->|Allow| H[Forward to matched upstream]
   Z1 -->|Audited via log_blocked_event| I[Structured security logs]
   Z2 -->|429 response + logging| I
