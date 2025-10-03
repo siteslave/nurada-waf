@@ -47,9 +47,9 @@ flowchart LR
 
   subgraph T[Application Hosts]
     direction LR
-    H1[Host: /]
-    H2[Host: /api]
-    H3[Host: /services]
+    H1[192.168.10.1:8080]
+    H2[192.168.10.1:8081]
+    H3[192.168.10.1:8082]
   end
 
   W -->|route /| H1
