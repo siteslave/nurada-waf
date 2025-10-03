@@ -39,9 +39,10 @@ flowchart LR
 
   subgraph S[WAF & Internal Services]
     direction TB
-    W[WAF (Core)]
+    W[WAF Core]
     ML[ML Service]
-    W <--> ML
+    W --> ML
+    ML -. feedback .-> W
   end
 
   W --> H1[Host: /]
