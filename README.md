@@ -48,8 +48,8 @@ flowchart LR
   subgraph T[Application Hosts]
     direction LR
     H1[192.168.10.1:8080]
-    H2[192.168.10.1:8081]
-    H3[192.168.10.1:8082]
+    H2[192.168.10.2:3000]
+    H3[192.168.10.3:4200]
   end
 
   W -->|route /| H1
