@@ -1,0 +1,54 @@
+services:
+  wafcore:
+    image: siteslave/waf-core:latest
+    container_name: waf-core
+    command: ["wafcore", "--config", "/app/config.yaml", "-v"]
+    environment:
+      - RUST_LOG=info
+      - WAF_CONFIG=/app/config.yaml
+    volumes:
+      # Mount your real config (edit locally then restart container)
+      - ./config.yaml:/app/config.yaml:rw
+      # Persist logs
+      - ./log:/app/log
+      - ./geoip:/app/geoip:ro
+      # Optional: TLS certs (uncomment if you have custom certs)
+      - ./certs:/app/certs:ro
+    ports:
+      - "8080:8080" # HTTP (if TLS disabled)
+      - "9443:9443" # HTTPS (when enabled in config)
+    restart: unless-stopped
+
+  wafui:
+    image: siteslave/waf-ui:latest
+    container_name: waf-ui
+    ports:
+      - "8081:80"
+    volumes:
+      - ./public/config.js:/usr/share/nginx/html/config.js:ro
+      - ./public/logo.png:/usr/share/nginx/html/public/logo.png:ro
+    restart: unless-stopped
+    depends_on:
+      - wafapi
+      - wafcore
+  wafapi:
+    image: siteslave/waf-api:latest
+    container_name: waf-api
+    working_dir: /app
+    ports:
+      - "8082:8082"
+    environment:
+      WAF_API_CONFIG: /app/api.config.yaml
+    volumes:
+      # Config files now live alongside this compose file in the docker/ directory
+      - ./api.config.yaml:/app/api.config.yaml:ro
+      - ./config.yaml:/app/config.yaml:rw
+      - ./log:/app/log
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "8082"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    depends_on:
+      - wafcore
+    restart: unless-stopped

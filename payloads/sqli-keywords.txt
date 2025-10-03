@@ -1,0 +1,20 @@
+admin'--
+' or 1=1--
+' or '1'='1
+' or true--
+'); DROP TABLE users;--
+' OR 1=1#
+' UNION SELECT
+' WAITFOR DELAY '0:0:5'
+'||UTL_HTTP.REQUEST
+or 1=1
+' or 1=1 --
+' or 1=1#
+../
+;shutdown--
+nvarchar
+information_schema
+sleep(
+benchmark(
+load_file(
+xp_cmdshell

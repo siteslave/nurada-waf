@@ -1,0 +1,9 @@
+(?i)\bUNION\s+SELECT\b
+' or 1=1--
+(?i)['"]\s*OR\s*['"]?1['"]?\s*=\s*['"]?1
+' UNION SELECT
+(?i)ORDER\s+BY\s+\d{1,3}
+admin'--
+(?i)\bDROP\s+TABLE\b
+information_schema
+sleep(

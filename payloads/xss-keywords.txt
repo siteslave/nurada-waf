@@ -1,0 +1,9 @@
+<script>
+</script>
+<script/>
+javascript:
+data:text/html
+onerror=
+onload=
+onmouseover=
+<img src=javascript:alert(1)>

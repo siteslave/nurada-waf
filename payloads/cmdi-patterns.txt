@@ -1,0 +1,11 @@
+(?i)\b(sh|bash|zsh|cmd|powershell|pwsh)\b
+(?i)\b(cat|ls|dir|whoami|nc|netcat|wget|curl)\b
+(?i)\b(chmod|chown|mv|cp|rm|scp|sftp|ssh)\b
+(?i)\b(ping|tracert|traceroute|nslookup|dig)\b
+(?i)\b(tar|gzip|gunzip|zip|unzip)\b
+(?i)[;&`|]
+(?i)\$\([
+\s\S]*?\)
+(?i)`[\s\S]*?`
+(?i)\b\w+\s*\|\s*\w+\b
+(?i)\b2>\&1\b

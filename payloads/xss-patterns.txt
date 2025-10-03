@@ -1,0 +1,10 @@
+(?i)<script[^>]*>
+(?i)</script>
+(?i)<script[^>]*/>
+(?i)onerror\s*=\s*
+(?i)onload\s*=\s*
+(?i)onmouseover\s*=\s*
+(?i)javascript:\s*
+(?i)data:\s*text/html
+(?i)<img[^>]*src\s*=\s*javascript:
+(?i)<svg[^>]*on\w+\s*=\s*

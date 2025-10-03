@@ -1,0 +1,85 @@
+# Docker-specific API server config
+manager:
+  listen:
+    address: 0.0.0.0
+    port: 8082
+core_config_path: "config.yaml"
+waf_log_file: "log/pingora-waf.log"
+# Auth kept minimal here; mount a production override for secrets
+auth:
+  enabled: true
+  public_routes:
+    - /auth/login
+    - /auth/logout
+  protected_routes:
+    - /api/*
+  admin_user:
+    username: admin
+    # Default password is "pingora"
+    password_hash: "$argon2id$v=19$m=19456,t=2,p=1$CMDfecPUox7XmaYganVJsw$JfznGZAG9aWUI+VJQgP2/BdwcXrcUHIf5oev77YfKOk"
+    enabled: true
+  jwt:
+    secret: CHANGE-ME-PROD-SECRET-256-BIT
+    algorithm: HS256
+    expiration_hours: 24
+    issuer: waf-api
+    audience: waf-api-users
+  password:
+    min_length: 8
+    require_uppercase: true
+    require_lowercase: true
+    require_numbers: true
+    require_special_chars: false
+    hash_memory: 19456
+    hash_iterations: 2
+    hash_parallelism: 1
+  brute_force_protection:
+    enabled: true
+    ip_based_limiting: true
+    global_rate_limit: true
+    ip_rate_limit:
+      max_attempts_per_ip: 5
+      ip_window_seconds: 300
+      ip_lockout_duration: 1800
+    global_rate_limit_config:
+      max_attempts_global: 50
+      global_window_seconds: 60
+      global_cooldown_seconds: 300
+    progressive_penalties:
+      enabled: true
+      first_penalty_seconds: 60
+      second_penalty_seconds: 300
+      third_penalty_seconds: 900
+      max_penalty_seconds: 3600
+      penalty_reset_hours: 24
+    detection:
+      enable_pattern_detection: true
+      suspicious_user_agents: true
+      detect_distributed_attacks: true
+      min_request_interval_ms: 100
+  rate_limiting:
+    enabled: true
+    max_attempts: 3
+    window_seconds: 300
+    lockout_duration_seconds: 1800
+  lockout:
+    enabled: true
+    max_failed_attempts: 3
+    lockout_duration_seconds: 1800
+    reset_attempts_after_seconds: 3600
+    enable_auto_unblock: true
+    notify_on_lockout: true
+  audit:
+    enabled: true
+    log_successful_logins: true
+    log_failed_logins: true
+    log_lockouts: true
+    log_password_changes: true
+cors:
+  enabled: true
+  allow_any_origin: true
+  allowed_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+  allowed_headers: ["Authorization", "Accept", "Content-Type", "Origin"]
+  expose_headers: []
+  allow_credentials: true
+  max_age: 3600

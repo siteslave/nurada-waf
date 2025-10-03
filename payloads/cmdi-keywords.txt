@@ -1,0 +1,16 @@
+;
+&&
+||
+|
+`
+$()
+2>&1
+>. /bin/sh
+/=/bin/bash
+/=/usr/bin/env sh
+/bin/sh -c
+/bin/bash -c
+`whoami`
+$(id)
+--proxy
+--output

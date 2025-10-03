@@ -1,0 +1,722 @@
+listen:
+  address: 0.0.0.0
+  port: 8080
+tls:
+  enabled: false
+  cert_path: ./certs/server.crt
+  key_path: ./certs/server.key
+  port: 9443
+logging:
+  log_file: /app/log/pingora-waf.log
+  max_file_size_mb: 100
+  max_backup_files: 5
+  syslog:
+    enabled: false
+    server: 127.0.0.1:514
+    protocol: udp
+    facility: local0
+    app_name: wafcore
+alerting:
+  enabled: true
+  mode: aggregate
+  aggregate:
+    window_secs: 300
+    max_ips: 10
+    include_payloads: true
+    max_payloads: 5
+  webhook:
+    enabled: false
+    url: null
+    method: POST
+    timeout_secs: 5
+    headers:
+      X-Source: wafcore
+  telegram:
+    enabled: true
+    bot_token: xxxxxxxxxx
+    chat_id: "-000000000"
+    parse_mode: Markdown
+    timeout_secs: 5
+upstreams:
+  - name: backend1
+    address: 192.168.1.110:4000
+    peer_options:
+      connection_timeout_secs: 10
+      total_connection_timeout_secs: 0
+      read_timeout_secs: 30
+      write_timeout_secs: 30
+      idle_timeout_secs: 60
+      verify_hostname: false
+      verify_cert: false
+  - name: backend2
+    address: 127.0.0.1:4001
+    peer_options:
+      connection_timeout_secs: 3
+      total_connection_timeout_secs: 10
+      read_timeout_secs: 15
+      write_timeout_secs: 15
+      idle_timeout_secs: 30
+      verify_hostname: false
+      verify_cert: false
+  - name: dvwa
+    address: 10.0.2.182:4280
+    peer_options:
+      connection_timeout_secs: 60
+      total_connection_timeout_secs: 0
+      read_timeout_secs: 30
+      write_timeout_secs: 30
+      idle_timeout_secs: 60
+      verify_hostname: false
+      verify_cert: false
+routes:
+  - path: /api/*
+    upstream: backend1
+    strip_prefix: true
+    rate_limit:
+      enabled: true
+      max_requests: 120
+      window_secs: 60
+      block_duration_secs: 600
+    plugins:
+      xss: true
+      sqli: false
+      path_traversal: false
+      cmdi: false
+      user_agent_filter: true
+      geoip: true
+    geoip_countries:
+      - TH
+      - VN
+      - AF
+  - path: /static/*
+    upstream: backend2
+    strip_prefix: true
+    rate_limit:
+      enabled: false
+      max_requests: 60
+      window_secs: 60
+      block_duration_secs: 600
+    plugins:
+      xss: false
+      sqli: true
+      path_traversal: false
+      cmdi: false
+      user_agent_filter: false
+      geoip: true
+    geoip_countries:
+      - TH
+      - AF
+      - AX
+  - path: /dvwa/*
+    upstream: dvwa
+    strip_prefix: true
+    rate_limit:
+      enabled: false
+      max_requests: 20
+      window_secs: 1200
+      block_duration_secs: 600
+    plugins:
+      xss: true
+      sqli: true
+      path_traversal: true
+      cmdi: true
+      user_agent_filter: true
+      geoip: true
+    geoip_countries:
+      - TH
+sqli_protection:
+  enabled: false
+  patterns:
+    - (?i)\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|EXEC|EXECUTE)\b
+    - (?i)\bUNION\s+(ALL\s+)?SELECT\b
+    - (?i)(--|#|/\*|\*/|;)
+    - (?i)\b(CONCAT|SUBSTRING|ASCII|CHAR|CHR)\s*\(
+    - (?i)\b(AND|OR)\s+\d+\s*=\s*\d+
+    - (?i)\b(SLEEP|WAITFOR|DELAY|BENCHMARK)\s*\(
+    - (?i)\b(INFORMATION_SCHEMA|SYSOBJECTS|SYSCOLUMNS)\b
+    - (?i)\b(@@VERSION|VERSION\(\)|SQLITE_VERSION)\b
+    - (?i)\b(LOAD_FILE|INTO\s+OUTFILE|INTO\s+DUMPFILE)\b
+    - (?i)\b0x[0-9a-f]+
+    - (?i)\b(LIKE|RLIKE|REGEXP|BETWEEN|IN\s*\()\b
+  protection_mode: manual
+  api_url: http://10.202.146.154:8002/predict
+  api_token: waf-xxxxxxx
+  timeout_secs: 5
+  confidence_threshold: 0.7
+  keywords:
+    - admin'--
+    - admin'/*
+    - "' or 1=1--"
+    - "' or 1=1#"
+    - "' or 1=1/*"
+    - "') or '1'='1--"
+    - "') or ('1'='1--"
+    - 1' or '1'='1
+    - 1' or '1'='1'--
+    - 1' or '1'='1'#
+    - 1' or '1'='1'/*
+    - 1 or 1=1
+    - 1 or 1=1--
+    - 1 or 1=1#
+    - 1 or 1=1/*
+    - "' union select"
+    - "' union all select"
+    - "' having 1=1--"
+    - "' group by"
+    - "' order by"
+    - "'; exec"
+    - "'; execute"
+    - "'; drop"
+    - "'; create"
+    - "'; insert"
+    - "'; update"
+    - "'; delete"
+    - waitfor delay
+    - sleep(
+    - benchmark(
+    - pg_sleep(
+    - dbms_pipe.receive_message
+    - information_schema
+    - sysobjects
+    - syscolumns
+    - sysusers
+    - "@@version"
+    - version()
+    - database()
+    - user()
+    - current_user
+    - load_file(
+    - into outfile
+    - into dumpfile
+    - xp_cmdshell
+    - sp_executesql
+    - convert(
+    - cast(
+    - char(
+    - ascii(
+    - substring(
+    - concat(
+    - length(
+    - count(
+  case_sensitive: false
+  action: block
+  response_code: 403
+  check_query_params: true
+  check_post_body: true
+  check_headers: false
+  max_payload_size: 8192
+  max_concurrent_api_requests: 8
+  api_error_threshold: 5
+  api_cooldown_secs: 30
+cmdi_protection:
+  enabled: true
+  action: block
+  response_code: 403
+  case_sensitive: false
+  check_query_params: true
+  check_post_body: true
+  check_headers: true
+  max_payload_size: 8192
+  decode_url: true
+  patterns:
+    - (?i)\b(sh|bash|dash|ksh|zsh)\b
+    - (?i)\b(cmd\.exe|powershell(\.exe)?)\b
+    - (?i)\b(curl|wget|nc|ncat|netcat|telnet|python|perl|ruby)\b
+  keywords:
+    - ;id
+    - ;whoami
+    - ;ls
+    - "&& id"
+    - "|| id"
+    - "`id`"
+    - $(id)
+    - "| id"
+    - sh -c
+    - bash -c
+    - cmd.exe /c
+    - powershell -Command
+    - cat /etc/passwd
+error_page:
+  expose_reason: false
+  brand_title: NERDA Web Application Firewall
+  brand_message: Message from Web Application Firewall (WAF).
+  support_contact: test@example.com
+rate_limit:
+  max_requests: 100
+  window_secs: 60
+  block_duration_secs: 1200
+  enable_global_limiter: true
+  global_max_requests_per_sec: 100
+  cache_capacity: 50000
+  blocked_cache_capacity: 20000
+ip_filter:
+  enabled: true
+  block_response_code: 403
+  ip_whitelist:
+    - 127.0.0.1/32
+    - 192.168.1.0/24
+    - 10.10.5.42/32
+    - 10.0.0.10
+  ip_blacklist:
+    - 203.0.113.0/24
+    - 198.51.100.25/32
+    - 203.0.113.99
+    - 203.0.113.100
+user_agent_filter:
+  enabled: true
+  blocked_exact:
+    - BadScraper/1.0
+    - EvilBot
+  blocked_substrings:
+    - wget
+    - python-requests
+  blocked_regex:
+    - (?i)masscan
+    - (?i)nikto
+    - (?i)(?:acunetix|netsparker)
+  case_insensitive: true
+  response_code: 403
+rfi_protection:
+  enabled: false
+  block_mode: false
+  log_violations: false
+  detection_patterns: []
+  whitelist_domains: []
+  scan_query_params: false
+  scan_form_data: false
+  scan_cookies: false
+  scan_headers: false
+  max_violations_per_minute: 0
+  action: null
+  response_code: null
+  max_url_length: null
+  keywords: []
+path_traversal_protection:
+  enabled: true
+  patterns:
+    - (?i)\.\.[/\\]
+    - (?i)[/\\]\.\.[/\\]
+    - (?i)\.\.\\
+    - (?i)\.\./
+    - (?i)%2e%2e[/\\]
+    - (?i)%2e%2e%2f
+    - (?i)%2e%2e%5c
+    - (?i)\.%2e[/\\]
+    - (?i)%2e\.[/\\]
+    - (?i)%252e%252e
+    - (?i)%252f
+    - (?i)%255c
+    - (?i)%c0%af
+    - (?i)%c1%9c
+    - (?i)%u002e
+    - (?i)%u002f
+    - (?i)%u005c
+    - (?i)^[/\\]etc[/\\]
+    - (?i)^[/\\]usr[/\\]
+    - (?i)^[/\\]var[/\\]
+    - (?i)^[/\\]root[/\\]
+    - (?i)^[/\\]home[/\\]
+    - (?i)^[/\\]tmp[/\\]
+    - (?i)^[/\\]boot[/\\]
+    - (?i)^[/\\]proc[/\\]
+    - (?i)^[/\\]sys[/\\]
+    - (?i)^[a-z]:\\
+    - (?i)c:\\windows
+    - (?i)c:\\program files
+    - (?i)c:\\users
+    - (?i)c:\\inetpub
+    - (?i)%00
+    - (?i)\\x00
+    - (?i)file:[/\\]{2,}
+    - (?i)\.\.\\\\
+    - (?i)\\\\\.\.
+    - (?i)\.{3,}
+    - (?i)\.\.[/\\]\.\.[/\\]
+    - (?i)\.\.\\\\\.\.
+    - (?i)\.\.//\.\.
+  action: block
+  response_code: 403
+  case_sensitive: false
+  max_url_length: 2048
+  check_query_params: true
+  check_post_body: true
+  max_body_size: 8192
+  block_message: Path traversal attempt detected
+  keywords:
+    - ../
+    - ..\
+    - ..%2f
+    - ..%5c
+    - "%2e%2e%2f"
+    - "%2e%2e%5c"
+    - /etc/passwd
+    - /etc/shadow
+    - /etc/hosts
+    - /etc/fstab
+    - /etc/crontab
+    - /etc/sudoers
+    - /etc/ssh/sshd_config
+    - /etc/apache2/apache2.conf
+    - /etc/nginx/nginx.conf
+    - /etc/mysql/my.cnf
+    - /proc/self/environ
+    - /proc/version
+    - /proc/cmdline
+    - /var/log/auth.log
+    - /var/log/apache2/access.log
+    - /var/log/nginx/access.log
+    - /root/.ssh/id_rsa
+    - /root/.bash_history
+    - /home/.ssh/id_rsa
+    - c:\windows\system32\config\sam
+    - c:\windows\system32\config\system
+    - c:\windows\system32\config\security
+    - c:\windows\system32\drivers\etc\hosts
+    - c:\windows\win.ini
+    - c:\windows\system.ini
+    - c:\boot.ini
+    - c:\autoexec.bat
+    - c:\config.sys
+    - c:\inetpub\wwwroot\web.config
+    - .env
+    - .htaccess
+    - .htpasswd
+    - wp-config.php
+    - config.php
+    - database.yml
+    - settings.py
+    - web.config
+    - applicationhost.config
+    - access.log
+    - error.log
+    - access_log
+    - error_log
+    - debug.log
+    - app.log
+    - .bak
+    - .backup
+    - .old
+    - .orig
+    - .save
+    - .tmp
+    - .sqlite
+    - .db
+    - .mdb
+    - .sql
+    - .dump
+    - .pem
+    - .key
+    - .crt
+    - .p12
+    - .pfx
+    - id_rsa
+    - id_dsa
+    - private.key
+    - .git/config
+    - .svn/entries
+    - .hg/hgrc
+    - .vscode/settings.json
+    - .idea/workspace.xml
+    - "%00"
+    - \x00
+    - file://
+    - file:///
+xss_protection:
+  enabled: true
+  patterns:
+    - (?i)<script[^>]*>
+    - (?i)</script>
+    - (?i)<script[^>]*/>
+    - (?i)\bon\w+\s*=
+    - (?i)\bon(load|error|click|focus|blur|change|submit|reset|select|resize|scroll|unload|beforeunload|mouseover|mouseout|mousemove|mousedown|mouseup|keydown|keyup|keypress)\s*=
+    - '(?i)javascript\s*:'
+    - '(?i)vbscript\s*:'
+    - '(?i)data\s*:'
+    - (?i)<iframe[^>]*>
+    - (?i)<object[^>]*>
+    - (?i)<embed[^>]*>
+    - (?i)<applet[^>]*>
+    - (?i)<style[^>]*>
+    - (?i)style\s*=
+    - (?i)expression\s*\(
+    - '(?i)behavior\s*:'
+    - '(?i)-moz-binding\s*:'
+    - (?i)<form[^>]*>
+    - (?i)<input[^>]*>
+    - (?i)<textarea[^>]*>
+    - (?i)<select[^>]*>
+    - (?i)<meta[^>]*>
+    - (?i)<link[^>]*>
+    - (?i)%3Cscript
+    - (?i)%3C%2Fscript%3E
+    - (?i)%6A%61%76%61%73%63%72%69%70%74
+    - (?i)&#[0-9]+;
+    - (?i)&#x[0-9a-f]+;
+    - (?i)&[a-z]+;
+    - (?i)document\s*\.\s*write
+    - (?i)document\s*\.\s*cookie
+    - (?i)document\s*\.\s*location
+    - (?i)window\s*\.\s*location
+    - (?i)alert\s*\(
+    - (?i)confirm\s*\(
+    - (?i)prompt\s*\(
+    - (?i)eval\s*\(
+    - (?i)setTimeout\s*\(
+    - (?i)setInterval\s*\(
+    - (?i)data:text/html;base64
+    - (?i)data:application/javascript;base64
+    - (?i)<svg[^>]*>
+    - (?i)<foreignobject[^>]*>
+    - (?i)`[^`]*\$\{[^}]*\}[^`]*`
+    - (?i)\$\{[^}]*\}
+    - (?i)<%[^%]*%>
+    - (?i)\{\{[^}]*\}\}
+    - (?i)\[%[^%]*%\]
+    - (?i)(\w+)(\s*=\s*)(!\w+\s*\+\s*\w+)
+    - (?i)\[\w+\]\s*\(\s*(\w+)?\s*\+\s*.*\)\s*\(\s*\)
+    - (?i)\w+\[\w+\]\s*\(\s*[^)]*\s*\)\s*\(\s*\)
+    - (?i)\b\w+\s*=\s*!\w+\s*\+\s*\w+\b
+    - (?i)!\[\]\s*\+\s*!\[\]
+    - (?i)!\[\]\s*\+\s*\[\]
+    - (?i)\[\]\s*\+\s*\[\]
+    - (?i)\(\[\]\[\w+\]\+\[\]\)
+    - (?i)\(\{\}\[\w+\]\+\[\]\)
+    - (?i)\(!\[\]\+\[\]\)\[\w+\]
+    - (?i)\(\+\[\]\+\[\]\)
+    - (?i)\[\]\[\w+\]\[\w+\]
+    - (?i)\w+\[\w+\]\[\w+\]\s*\(.*\)
+    - (?i)\(\[\]\[\w+\]\+\[\]\)\[\w+\]\[\w+\]
+    - (?i)\w+\s*\+\s*\w+\s*\+\s*\w+\s*\+\s*\w+\s*\+\s*\w+
+    - (?i)(\w+\[\d+\]\s*\+\s*){3,}
+    - (?i)\w+\[\w+\]\s*\+\s*\w+\[\w+\]
+    - (?i)\w+\[\w+\]\s*\(\s*\w+\s*\)
+    - (?i)\[\w+\]\[\w+\]\s*\(\s*[^)]*\s*\)
+    - (?i)this\[\w+\]\s*\(\s*[^)]*\s*\)
+    - (?i)\(\+\+\+\[
+    - (?i)\[\+\[\]\]
+    - (?i)\[\+!\+\[\]\]
+    - (?i)\[!\[\]\+!\[\]\]
+  action: block
+  response_code: 403
+  case_sensitive: false
+  max_url_length: 2048
+  check_query_params: true
+  check_post_body: true
+  max_body_size: 8192
+  check_headers: false
+  decode_url: true
+  decode_html_entities: true
+  block_message: XSS attempt detected
+  keywords:
+    - <script>
+    - </script>
+    - <script/>
+    - "javascript:"
+    - "vbscript:"
+    - data:text/html
+    - onload=
+    - onerror=
+    - onclick=
+    - onmouseover=
+    - onmouseout=
+    - onfocus=
+    - onblur=
+    - onchange=
+    - onsubmit=
+    - onreset=
+    - onselect=
+    - onresize=
+    - onscroll=
+    - onunload=
+    - onbeforeunload=
+    - onkeydown=
+    - onkeyup=
+    - onkeypress=
+    - onmousemove=
+    - onmousedown=
+    - onmouseup=
+    - alert(
+    - confirm(
+    - prompt(
+    - eval(
+    - setTimeout(
+    - setInterval(
+    - document.write(
+    - document.cookie
+    - document.location
+    - window.location
+    - <iframe
+    - <object
+    - <embed
+    - <applet
+    - <style
+    - <form
+    - <input
+    - <textarea
+    - <select
+    - <meta
+    - <link
+    - <svg
+    - <foreignobject
+    - expression(
+    - "behavior:"
+    - "-moz-binding:"
+    - style=
+    - "%3Cscript"
+    - "%3C%2Fscript%3E"
+    - "%6A%61%76%61%73%63%72%69%70%74"
+    - "%3Ciframe"
+    - "%3Cobject"
+    - "%3Cembed"
+    - "%3Cstyle"
+    - "%3Cform"
+    - "%3Cinput"
+    - "%3Cmeta"
+    - "%3Clink"
+    - "%3Csvg"
+    - "&lt;script&gt;"
+    - "&lt;/script&gt;"
+    - "&lt;iframe"
+    - "&lt;object"
+    - "&lt;embed"
+    - "&lt;style"
+    - "&lt;form"
+    - "&lt;input"
+    - "&lt;meta"
+    - "&lt;link"
+    - "&lt;svg"
+    - \u003cscript
+    - \u003c/script\u003e
+    - '\u006aavascript:'
+    - PHNjcmlwdD4=
+    - PC9zY3JpcHQ+
+    - amF2YXNjcmlwdDo=
+    - <img src=x onerror=
+    - <body onload=
+    - <div onmouseover=
+    - <input onfocus=
+    - <select onfocus=
+    - <textarea onfocus=
+    - <button onclick=
+    - '<a href="javascript:'
+    - '<form action="javascript:'
+    - ${
+    - "{{"
+    - <%
+    - "[%"
+    - import(
+    - "import "
+    - WebAssembly.instantiate
+    - fetch(
+    - XMLHttpRequest
+    - FileReader
+    - Worker(
+    - SharedWorker(
+    - ServiceWorker
+    - postMessage(
+    - addEventListener(
+    - "@import"
+    - url(
+    - expression(
+    - data:image/svg+xml
+    - data:application/javascript
+    - data:text/javascript
+    - "chrome:"
+    - "chrome-extension:"
+    - "moz-extension:"
+    - "safari-extension:"
+    - "ms-appx:"
+    - "ms-appx-web:"
+    - "file:"
+    - "ftp:"
+    - "gopher:"
+    - "ldap:"
+    - String.fromCharCode(
+    - unescape(
+    - decodeURI(
+    - decodeURIComponent(
+    - Function(
+    - "[constructor]"
+    - constructor
+    - "!![]+!![]"
+    - "![]+[]"
+    - "!![]+[]"
+    - "[]+[]"
+    - +[]
+    - "[][[]]"
+    - ([]+[])[+[]]
+    - (!![]+[])[+[]]
+    - (![]+[])[+[]]
+    - ([].constructor+[])
+    - ({}.constructor+[])
+    - String.fromCharCode
+    - charAt
+    - charCodeAt
+    - fromCharCode
+    - ++[[]][+[]]
+    - "[+[]]"
+    - "[+!+[]]"
+    - "[!![]]"
+    - "['constructor']"
+    - "['eval']"
+    - "['alert']"
+    - '["constructor"]'
+    - '["eval"]'
+    - '["alert"]'
+    - window['
+    - document['
+    - this['
+    - self['
+    - top['
+    - parent['
+    - \x65\x76\x61\x6c
+    - \x61\x6c\x65\x72\x74
+    - \x46\x75\x6e\x63\x74\x69\x6f\x6e
+  whitelisted_headers:
+    - content-type
+    - accept
+    - accept-language
+    - accept-encoding
+    - cache-control
+    - pragma
+    - authorization
+    - host
+    - connection
+    - upgrade-insecure-requests
+security_misconfig:
+  enabled: false
+  block_mode: false
+  log_violations: false
+  hide_server_info: false
+  remove_x_powered_by: false
+  add_security_headers: false
+  custom_headers: {}
+  force_https: false
+  hsts_max_age: 0
+  content_security_policy: ""
+  enable_url_filtering: false
+  remove_server_header: false
+  remove_powered_by: false
+  remove_version_headers: false
+  remove_debug_headers: false
+  log_removed_headers: false
+  max_response_size_check: 0
+  blocked_url_patterns: []
+  custom_headers_to_remove: []
+  custom_headers_to_add: {}
+  sensitive_response_patterns: []
+geoip_filter:
+  enabled: true
+  db_path: ./geoip/geolite2.mmdb
+  block_response_code: 403
+real_ip:
+  enabled: true
+  trusted_proxies:
+    - 127.0.0.1/32
+    - ::1/128
+    - 172.16.0.0/12
+  header_order:
+    - x-forwarded-for
+    - forwarded
+    - x-real-ip
+    - cf-connecting-ip
