@@ -119,6 +119,7 @@ docker compose logs -f wafcore
 - UI: เปิดเบราว์เซอร์ไปที่ <http://localhost:8081>
 - API: <http://localhost:8082> (UI จะเรียก API นี้ตามค่า `public/config.js`)
 - WAF Proxy: ทดสอบผ่าน <http://localhost:8080> (หรือ <https://localhost:9443> เมื่อเปิด TLS)
+- Username/Password: admin/Pingora#1234
 
 หมายเหตุ: ค่าเริ่มต้นใน `config.docker.yaml` มีตัวอย่าง `upstreams` และ `routes` แล้ว คุณควรแก้ไขให้ตรงกับ backend ของคุณจริงก่อนใช้งานจริง
 
