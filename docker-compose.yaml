@@ -6,7 +6,7 @@ services:
     environment:
       - RUST_LOG=info
     volumes:
-      - ./config.yaml:/app/config.yaml:rw
+      - ./config.yaml:/app/config.yaml:ro
       - ./log:/app/log
       - ./geoip:/app/geoip:ro
       - ./certs:/app/certs:ro
