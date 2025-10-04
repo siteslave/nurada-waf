@@ -1,6 +1,6 @@
-# NERDA WAF (Deploy)
+# Nurada WAF (Deploy)
 
-เอกสารนี้อธิบายวิธีติดตั้งและใช้งาน NERDA WAF (Web Application Firewall) ด้วย Docker บนเครื่องพัฒนา รวมถึงการตั้งค่าเบื้องต้น การสร้างใบรับรอง TLS การใช้งาน UI และ API ตลอดจนแนวทางแก้ปัญหาเบื้องต้น
+เอกสารนี้อธิบายวิธีติดตั้งและใช้งาน Nurada WAF (Web Application Firewall) ด้วย Docker บนเครื่องพัฒนา รวมถึงการตั้งค่าเบื้องต้น การสร้างใบรับรอง TLS การใช้งาน UI และ API ตลอดจนแนวทางแก้ปัญหาเบื้องต้น
 
 ## ภาพรวมระบบ
 
@@ -101,7 +101,8 @@ flowchart TD
 1. ดึงอิมเมจและรันคอนเทนเนอร์
 
 ```powershell
-cd c:\Projects\waf\deploy
+git clone https://github.com/siteslave/nurada-waf
+cd nurada-waf
 docker compose pull
 docker compose up -d
 ```
@@ -130,7 +131,7 @@ docker compose logs -f wafcore
 - Windows (PowerShell):
 
 ```powershell
-cd c:\Projects\waf\deploy
+cd nurada-waf
 ./scripts/generate_cert.ps1 -Domain localhost -Days 825
 ```
 
