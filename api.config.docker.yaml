@@ -15,8 +15,8 @@ auth:
     - /api/*
   admin_user:
     username: admin
-    # Default password is "pingora"
-    password_hash: "$argon2id$v=19$m=19456,t=2,p=1$CMDfecPUox7XmaYganVJsw$JfznGZAG9aWUI+VJQgP2/BdwcXrcUHIf5oev77YfKOk"
+    # Default password is "Pingora#1234", change in production!
+    password_hash: $argon2id$v=19$m=19456,t=2,p=1$qi6+npqJbNcHt2rdK4KYtw$PXlQQrMPYFujUL18YSHVegqiMjbHE8hbJFL71qLqSb4
     enabled: true
   jwt:
     secret: CHANGE-ME-PROD-SECRET-256-BIT
