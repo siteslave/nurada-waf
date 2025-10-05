@@ -91,7 +91,7 @@ flowchart TD
 ## โครงสร้างโฟลเดอร์
 
 - `certs/` ใบรับรองและกุญแจ TLS สำหรับใช้งาน HTTPS (มีสคริปต์ช่วยสร้างใน `scripts/`)
-- `geoip/` ฐานข้อมูล GeoIP (`geolite2.mmdb`) สำหรับฟีเจอร์กรองตามประเทศ
+- `geoip/` ฐานข้อมูล GeoIP (`geolite2.mmdb`) สำหรับฟีเจอร์กรองตามประเทศ ดาวน์โหลดได้จาก https://dev.maxmind.com/geoip/geolite2-free-geolocation-data/
 - `log/` ไฟล์ล็อกของระบบ (`pingora-waf.log`)
 - `payloads/` ไฟล์ตัวอย่าง payload (.txt) สำหรับนำเข้าในหน้า UI (XSS/SQLi/CMDi/Path Traversal)
 - `public/` ไฟล์ UI แบบ static และ `config.js`
