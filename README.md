@@ -92,11 +92,11 @@ flowchart TD
   E -->|Blocked| Z1
   E -->|Allowed| F{XSS protection}
   F -->|Blocked| Z1
-  F -->|Allowed| CMD{Command Injection (CMDi)}
+  F -->|Allowed| CMD{Command Injection}
   CMD -->|Blocked| Z1
-  CMD -->|Allowed| RFI{Remote File Inclusion (RFI)}
+  CMD -->|Allowed| RFI{Remote File Inclusion}
   RFI -->|Blocked| Z1
-  RFI -->|Allowed| LFI{Local File Inclusion (LFI)}
+  RFI -->|Allowed| LFI{Local File Inclusion}
   LFI -->|Blocked| Z1
   LFI -->|Allowed| FU{File Upload Inspection}
   FU -->|Blocked| Z1
