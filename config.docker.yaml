@@ -323,10 +323,10 @@ real_ip:
     # - "10.0.0.0/8"     # Uncomment if your proxy connects from a 10.x.x.x subnet
   # Header preference order (case-insensitive). First matching header wins.
   header_order:
-    - "x-forwarded-for"
-    - "forwarded"
     - "x-real-ip"
     - "cf-connecting-ip"
+    - "x-forwarded-for"
+    - "forwarded"
 
 # Phase 1 Note: Path canonicalization (collapse //, resolve . and .., selective unreserved percent-decode) happens automatically before routing & inspections.
 # Phase 1 Note: Config hot-reload uses SHA-256 hashing & rate limiting (max 5 reloads / 30s, then 30s cooldown). No YAML settings required presently.
