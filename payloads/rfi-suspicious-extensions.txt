@@ -1,0 +1,27 @@
+# Suspicious / potentially dangerous file extensions for inclusion
+# Lines beginning with # are comments
+.php
+.phtml
+.php5
+.php7
+.asp
+.aspx
+.jsp
+.jspf
+.cfm
+.cgi
+.pl
+.py
+.rb
+.sh
+.phar
+.inc
+.ini
+.conf
+.env
+.log
+.sql
+.swp
+.bak
+.old
+.backup

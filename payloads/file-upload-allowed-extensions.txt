@@ -1,0 +1,48 @@
+# Allowed Extensions for File Upload Protection
+# One per line, leading dot format. Keep concise to reduce attack surface.
+# Remove what you don't use; smaller allowlists are safer.
+# Lines beginning with # are ignored.
+
+.jpg
+.jpeg
+.png
+.webp
+.gif
+.svg
+.avif
+.ico
+.bmp
+.txt
+.md
+.pdf
+.csv
+.json
+.xml
+.log
+.ini
+.conf
+.yaml
+.yml
+.properties
+.html
+.htm
+.css
+.map
+.mp3
+.wav
+.ogg
+.mp4
+.webm
+.mov
+.zip
+.tar
+.gz
+.tgz
+.bz2
+.xz
+.7z
+.eot
+.otf
+.ttf
+.woff
+.woff2

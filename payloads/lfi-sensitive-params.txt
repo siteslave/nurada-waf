@@ -1,0 +1,26 @@
+# Sensitive parameter names often used for local/remote file inclusion
+# These can be imported into LFI or RFI sensitive params lists
+file
+filepath
+filename
+path
+page
+include
+inc
+load
+template
+tpl
+layout
+view
+content
+module
+plugin
+config
+lang
+locale
+log
+exec
+shell
+cmd
+archive
+backup

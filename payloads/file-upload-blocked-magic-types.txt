@@ -1,0 +1,9 @@
+# Available magic type identifiers (add to list to enforce):
+#   php, elf, pe, jar, class, script, pdf, png, zip
+# Defaults intentionally exclude pdf/png/zip to avoid breaking legitimate uploads; opt-in if required.
+- php
+- elf
+- pe 
+- jar 
+- class 
+- script

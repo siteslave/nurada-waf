@@ -1,0 +1,18 @@
+# Blocked Schemes for Remote File Inclusion
+# Lines starting with # are ignored.
+# Common remote / wrapper schemes often abused (normalized with :// where applicable)
+http://
+https://
+ftp://
+data:
+php://
+php://filter
+php://input
+file://
+zip://
+phar://
+expect://
+ldap://
+ldaps://
+gopher://
+sftp://
