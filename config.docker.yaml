@@ -13,7 +13,7 @@ logging:
   log_file: ./log/pingora-waf.log
   max_file_size_mb: 10
   max_backup_files: 5
-  # Phase 1 Redaction: headers whose values will be masked in logs & alerts
+  timezone: "Asia/Bangkok"
   redact_headers:
     - Authorization
     - Cookie
@@ -121,6 +121,9 @@ routes:
       cmdi: false
       user_agent_filter: false
       geoip: false
+      rfi: false
+      lfi: false
+      file_upload: false
 # SQL Injection Protection
 sqli_protection:
   enabled: true # Enable/disable SQL injection protection
@@ -256,6 +259,113 @@ ip_filter:
     - "198.51.100.25/32" # IP รายตัว (TEST-NET-2) ที่ต้องการบล็อคเฉพาะ
     - "203.0.113.99"
     - "203.0.113.100"
+rfi_protection:
+  enabled: true # เปิด/ปิด Remote File Inclusion protection
+  detection_only: false # true = log only; false = block
+  response_code: 403 # HTTP status code when blocking RFI
+  block_message: "Remote File Inclusion attempt detected" # Generic message shown when blocked (reason hidden if expose_reason=false)
+  max_url_length: 2048 # Maximum full URL length (path+query) to inspect; longer URLs are skipped (allowed) for performance safety
+  blocked_schemes:
+    - "http://"
+    - "https://"
+    - "ftp://"
+    - "sftp://"
+    - "php://"
+    - "file://"
+    - "data:"
+  sensitive_params:
+    - file
+    - path
+    - page
+    - include
+    - template
+    - doc
+    - url
+    - view
+    - action
+  suspicious_extensions:
+    - .php
+    - .phtml
+    - .inc
+    - .txt
+    - .cfg
+    - .conf
+  max_value_len: 4096 # cap parameter value length scanned
+  whitelist_domains: [] # List of remote hostnames allowed even if scheme matches (exact, case-insensitive)
+  check_post_body: true # Inspect application/x-www-form-urlencoded POST/PUT/PATCH body
+  max_body_size: 8192 # Max body bytes to scan for RFI
+lfi_protection:
+  enabled: true # เปิด/ปิด Local File Inclusion protection
+  detection_only: false # true = log only
+  response_code: 403
+  block_message: "Local File Inclusion attempt detected"
+  max_url_length: 2048
+  sensitive_params:
+    - file
+    - path
+    - page
+    - include
+    - template
+    - doc
+  traversal_tokens:
+    - "../"
+    - "..\\"
+    - "%2e%2e%2f"
+    - "%2e%2e%5c"
+    - "..%2f"
+    - "..%5c"
+  sensitive_files:
+    - /etc/passwd
+    - /etc/shadow
+    - c:/windows/system32/config/sam
+    - c:/boot.ini
+    - .env
+    - wp-config.php
+  max_value_len: 4096
+  check_post_body: true
+  max_body_size: 8192
+file_upload_protection:
+  enabled: true # เปิด/ปิด File Upload protection
+  detection_only: false # true = log only (observe traffic first)
+  response_code: 403
+  block_message: "Malicious file upload blocked"
+  max_multipart_size: 10485760 # 10MB aggregate cap
+  max_file_size: 2097152 # 2MB per file
+  max_files: 10 # Prevent excessive part counts
+  allowed_extensions: [jpg, jpeg, png, gif, pdf, xlsx, xls, docx, txt]
+  blocked_extensions:
+    [
+      php,
+      php5,
+      phtml,
+      jsp,
+      asp,
+      aspx,
+      exe,
+      dll,
+      sh,
+      bash,
+      bat,
+      cmd,
+      ps1,
+      cgi,
+      pl,
+      rb,
+      jar,
+      war,
+      class,
+    ]
+  inspect_magic: true # Enable signature/magic byte inspection
+  # Available magic type identifiers (add to list to enforce):
+  #   php, elf, pe, jar, class, script, pdf, png, zip
+  # Defaults intentionally exclude pdf/png/zip to avoid breaking legitimate uploads; opt-in if required.
+  blocked_magic_types: [php, elf, pe, jar, class, script]
+  allow_content_type_mismatch: false # Block when MIME header and magic differ suspiciously
+  normalize_double_extension: true # Detect inner extension (e.g. shell.php.jpg)
+  suspicious_inner_extensions: [php, jsp, asp, aspx, js, sh, bat, exe]
+  max_field_name_len: 128
+  max_filename_len: 256
+
 cmdi_protection:
   enabled: true
   action: block
