@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.1.3] - 2025-10-07
+
+### WAF-CORE
+
+#### Changed
+
+- Per-route plugin toggles: `rfi`, `lfi`, and `file_upload` now default to disabled when omitted (previously treated as enabled when the global module was on). To enable for a route, explicitly set the flag to `true` under `route.plugins`. Other plugins retain prior behavior (omitted = enabled). This is a behavioral tightening to avoid unintended inspection overhead.
+
+#### Migration Notes
+
+- If you relied on implicit activation of RFI/LFI/File Upload protection on routes without explicit `plugins:` entries, add:
+
+```yaml
+plugins:
+  rfi: true
+  lfi: true
+  file_upload: true
+```
+
+to those route definitions.
+
+### WAF-API
+
+#### Added
+
+- Config normalization (`ensure_defaults`) now auto-populates safe default values for newly introduced or unset fields across multiple protection sections (RFI, LFI, File Upload, Path Traversal, XSS, CMDi, User-Agent filter, GeoIP filter, IP filter). Each applied change is logged with a human-readable message at startup.
+- Additional test coverage for default application and idempotency:
+  - RFI / LFI / File Upload defaults (response codes, size limits, overlap cleanup, message population)
+  - Path Traversal, XSS, and CMDi default response code + size/url limits
+  - User-Agent filter, GeoIP filter, IP filter default block codes (403)
+  - File upload relational validation (max_file_size clamped to max_multipart_size)
+  - Extension overlap removal logic (allowed vs blocked) implicitly validated
+  - Idempotency test ensures subsequent normalization passes make no changes
+
+### WAF-UI
+
+#### Added
+
+- Backup page: skeleton loading rows for Files and History tables.
+- Backup page: illustrated empty states (icon + explanatory text + primary / secondary actions).
+- Backup & History: click active tab (Files / History) now forces a refresh (debounced by loading state).
+- Global toast system (top-right) standardized across configuration pages for create/save/delete/download/restore actions (success, destructive, warning, info variants).
+
+#### Changed
+
+- Backup page: reverted CRUD/action feedback from inline-only to unified global toast usage for consistency with other pages; inline tray retained only for potential future retry contexts.
+- Backup & History initial load failures now render embedded error panels (icon + message + Retry) instead of inline error toasts.
+- Removed circular badge backgrounds around illustrative icons in Backup empty/error states (cleaner minimal style).
+- Files & History pagination footers are hidden during loading or error states to prevent stale/phantom page counts.
+
+#### Fixed
+
+- Backup Files pagination showing multiple pages after API failure (list resets & footer hidden).
+- History pagination persisting stale pages after fetch error (history cleared & page reset on error, footer hidden).
+- Reverse Proxy: Upstream Security dialog opening with tooltip ("Deny private networks") shown immediately; prevented auto-focus on tooltip trigger.
+
 ## [0.1.2] - 2025-10-07
 
 ### WAF-CORE
