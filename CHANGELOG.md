@@ -52,7 +52,7 @@
 - Exposed new counters in stats response: `upload`, `rfi`, `lfi` (omitted from JSON when zero).
 - Updated README with unified block log format documentation, token table, and removal of legacy parsing guidance.
 
-### Notes
+#### Notes
 
 - Previous mixed token forms (e.g., `SQLI_DETECTED|`, `XSS_DETECTED|`, `UA_BLOCK|`, `IP_BLACKLISTED|`) are no longer tallied for new statistics calculations; ensure log emitter conforms to new format for accurate counts.
 - Unified token tests added for CMDI, PATH_TRAVERSAL, USER_AGENT, and IP_FILTER to validate parsing logic.
