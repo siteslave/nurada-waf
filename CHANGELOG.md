@@ -59,7 +59,8 @@
 
 ### WAF-UI 
 
-No changes in this version.
+- Update Sidebar menu
+- Add icon on page title
 
 ## [0.1.3] - 2025-10-07
 
