@@ -1,5 +1,66 @@
 # Changelog
 
+## [0.1.4] - 2025-10-08
+
+### WAF-CORE
+
+#### Added
+
+- File Upload blocked log payload now includes `filename=<name>` prefix (before sanitized preview) for easier incident triage and correlation.
+- Per-request correlation ID for all blocked enforcement events: new `request_id=` field in `BLOCKED|...` log lines and `X-WAF-Request-ID` header plus embedded JSON/HTML body token in block responses for user-facing correlation.
+- Branded block response footer: "Powered by NuradaWAF" now rendered bottom-right in HTML block pages (opposite support contact) and a `"powered_by": "NuradaWAF"` field added to JSON block responses for user-facing transparency and downstream UI display.
+
+#### Changed (Unreleased)
+
+- `FileUploadDecision` enum variants `Block` and `Log` now carry an `Option<String>` with the originating filename. Existing code matching on `Block(reason)` must be updated to `Block(reason, _)`.
+- Multipart file upload logging merges reason + filename into the blocked `BLOCKED|type=UPLOAD` payload string. Format example:
+  `BLOCKED|type=UPLOAD|...|payload=filename=shell.php blocked_extension;field1=value1&...` (preview still redacted/truncated as before).
+- Global blocked log line format enhanced: now consistently appends `location=<context>` (e.g. `location=body`, `location=header:User-Agent`, `location=rate_limit:ip`) and ensures only a single centralized `BLOCKED|...` line is emitted per enforcement (duplicate per-plugin block lines removed). This is backward-incompatible for strict log parsers expecting a fixed field count—update parsing rules to allow the new `location=` segment (appears before `payload=`) and optional filename prefix inside `payload` for uploads.
+- Blocked log line format now also includes `request_id=<uuid32>` immediately after the `location=` field. Update any log parsers/ETL pipelines to accept the new token order: `...|method=GET|location=body|request_id=<uuid32>|payload=...` where `<uuid32>` is a dashless (32 lowercase hex) UUID v4.
+- Request ID format changed from a custom time/counter hex to a dashless UUID v4 (32 lowercase hex chars) to improve entropy and cross-system uniqueness.
+- Response correlation header renamed from `X-Request-ID` to `X-WAF-Request-ID` to reduce collision risk with upstream or existing infrastructure headers.
+
+#### Changed
+
+- `FileUploadDecision` enum variants `Block` and `Log` now carry an `Option<String>` with the originating filename. Existing code matching on `Block(reason)` must be updated to `Block(reason, _)`.
+- Multipart file upload logging merges reason + filename into the blocked `BLOCKED|type=UPLOAD` payload string. Format example:
+  `BLOCKED|type=UPLOAD|...|payload=filename=shell.php blocked_extension;field1=value1&...` (preview still redacted/truncated as before).
+- Global blocked log line format enhanced: now consistently appends `location=<context>` (e.g. `location=body`, `location=header:User-Agent`, `location=rate_limit:ip`) and ensures only a single centralized `BLOCKED|...` line is emitted per enforcement (duplicate per-plugin block lines removed). This is backward-incompatible for strict log parsers expecting a fixed field count—update parsing rules to allow the new `location=` segment (appears before `payload=`) and optional filename prefix inside `payload` for uploads.
+- Blocked log line format now also includes `request_id=<uuid32>` immediately after the `location=` field. Update any log parsers/ETL pipelines to accept the new token order: `...|method=GET|location=body|request_id=<uuid32>|payload=...` where `<uuid32>` is a dashless (32 lowercase hex) UUID v4.
+- Request ID format changed from a custom time/counter hex to a dashless UUID v4 (32 lowercase hex chars) to improve entropy and cross-system uniqueness.
+- Response correlation header renamed from `X-Request-ID` to `X-WAF-Request-ID` to reduce collision risk with upstream or existing infrastructure headers.
+
+#### Fixed
+
+- `file_upload_protection.inspect_magic` serde default now correctly resolves to `true` (previously only true via `Default` impl, causing deserialized configs without the field to disable magic inspection inadvertently).
+
+### WAF-API
+
+- Dashboard stats parsing updated to count block events strictly via new unified patterns:
+  - `BLOCKED|type=SQLI`
+  - `BLOCKED|type=XSS`
+  - `BLOCKED|type=UPLOAD`
+  - `BLOCKED|type=RFI`
+  - `BLOCKED|type=LFI`
+  - `BLOCKED|type=PATH_TRAVERSAL`
+  - `BLOCKED|type=GEOIP`
+  - `BLOCKED|type=IP_FILTER`
+  - `BLOCKED|type=GLOBAL_RATE_LIMIT`
+  - `BLOCKED|type=ROUTE_RATE_LIMIT`
+  - `BLOCKED|type=USER_AGENT`
+- Removed all legacy fallback parsing branches from dashboard stats, attack logs, and attack series endpoints (now unified-format only).
+- Exposed new counters in stats response: `upload`, `rfi`, `lfi` (omitted from JSON when zero).
+- Updated README with unified block log format documentation, token table, and removal of legacy parsing guidance.
+
+### Notes
+
+- Previous mixed token forms (e.g., `SQLI_DETECTED|`, `XSS_DETECTED|`, `UA_BLOCK|`, `IP_BLACKLISTED|`) are no longer tallied for new statistics calculations; ensure log emitter conforms to new format for accurate counts.
+- Unified token tests added for CMDI, PATH_TRAVERSAL, USER_AGENT, and IP_FILTER to validate parsing logic.
+
+### WAF-UI 
+
+No changes in this version.
+
 ## [0.1.3] - 2025-10-07
 
 ### WAF-CORE
