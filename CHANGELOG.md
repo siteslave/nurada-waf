@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.1.5] - 2025-10-09
+
+### WAF-CORE
+
+#### Added
+
+- Dual listeners: when `tls.enabled: true`, the service now runs both HTTP on `listen.port` and HTTPS on `tls.port` concurrently.
+- Optional HTTP → HTTPS redirect: new `tls.redirect_http_to_https` config flag (default `false`). When enabled, requests received on the HTTP listener are redirected to HTTPS with 308 Permanent Redirect, preserving host, path, and query. Port is omitted in Location when `tls.port` is 443.
+
+#### Changed
+
+- Dependencies: Upgraded Pingora stack to 0.6.0 (`pingora`, `pingora-load-balancing`, `pingora-limits`). No code changes were required for this upgrade; full test suite remains green.
+- Config examples: Updated `config.example.yaml` and `docker/config.docker.yaml` `tls` comments to clarify dual-listener behavior and document the new `tls.redirect_http_to_https` flags.
+
+### WAF-API
+
+#### Added
+
+* Config: Added `tls.redirect_http_to_https` (bool, default `false`) to TLS settings. When enabled, plain HTTP requests are redirected to HTTPS.
+
+#### Changed
+
+* Docs: README now includes a TLS configuration section with `redirect_http_to_https` examples and notes.
+* Samples: Updated `config.yaml` and `docker/config.docker.yaml` examples to include `redirect_http_to_https` under `tls`.
+* Docs/Samples: Removed experimental `min_tls_version` and `enable_h2` references to reflect reverted fields.
+
+### WAF-UI
+
+#### Added
+
+- Server Settings: TLS/HTTPS Configuration now includes a "Redirect HTTP to HTTPS" option.
+  - Wired end-to-end with backend via `/api/config/tls` using `redirect_http_to_https`.
+  - UI toggle persists and loads correctly.
+
+#### Changed
+
+- TLS/HTTPS Configuration is always visible and contains the "Enable HTTPS" toggle within the section header.
+- Refactored TLS/HTTPS layout for clarity and consistency:
+  - Top row: HTTPS Port, Redirect HTTP to HTTPS, and Certificate Path share the first row using responsive spans.
+  - Private Key Path remains aligned directly beneath Certificate Path for balanced spacing.
+  - Inputs related to TLS are disabled when HTTPS is turned off for clearer UX.
+
+#### Removed
+
+- Server Settings: dropped Minimum TLS Version and Enable HTTP/2 controls from the UI and configuration payloads.
+
+#### Fixed
+
+- Prevent duplicate API requests when opening Settings subpages (Server, Logging, Error Page, Geo IP, Real IP) during development by disabling React StrictMode only in dev. Production behavior unaffected.
+
 ## [0.1.4] - 2025-10-08
 
 ### WAF-CORE

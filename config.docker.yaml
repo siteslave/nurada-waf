@@ -5,10 +5,11 @@ listen:
 
 tls:
   # TLS configuration. When enabled, the server will run ONLY on this TLS port (no HTTP listener/fallback).
-  enabled: false # Set to false to disable TLS and serve only HTTP on the primary listen port
+  enabled: true # Set to false to disable TLS and serve only HTTP on the primary listen port
   cert_path: ./certs/server.crt
   key_path: ./certs/server.key
   port: 9443 # HTTPS port.
+  redirect_http_to_https: true # If TLS.enabled, redirect HTTP (primary listen port) to HTTPS
 logging:
   log_file: ./log/pingora-waf.log
   max_file_size_mb: 10
