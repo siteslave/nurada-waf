@@ -60,16 +60,6 @@
 - Per-request correlation ID for all blocked enforcement events: new `request_id=` field in `BLOCKED|...` log lines and `X-WAF-Request-ID` header plus embedded JSON/HTML body token in block responses for user-facing correlation.
 - Branded block response footer: "Powered by NuradaWAF" now rendered bottom-right in HTML block pages (opposite support contact) and a `"powered_by": "NuradaWAF"` field added to JSON block responses for user-facing transparency and downstream UI display.
 
-#### Changed (Unreleased)
-
-- `FileUploadDecision` enum variants `Block` and `Log` now carry an `Option<String>` with the originating filename. Existing code matching on `Block(reason)` must be updated to `Block(reason, _)`.
-- Multipart file upload logging merges reason + filename into the blocked `BLOCKED|type=UPLOAD` payload string. Format example:
-  `BLOCKED|type=UPLOAD|...|payload=filename=shell.php blocked_extension;field1=value1&...` (preview still redacted/truncated as before).
-- Global blocked log line format enhanced: now consistently appends `location=<context>` (e.g. `location=body`, `location=header:User-Agent`, `location=rate_limit:ip`) and ensures only a single centralized `BLOCKED|...` line is emitted per enforcement (duplicate per-plugin block lines removed). This is backward-incompatible for strict log parsers expecting a fixed field count—update parsing rules to allow the new `location=` segment (appears before `payload=`) and optional filename prefix inside `payload` for uploads.
-- Blocked log line format now also includes `request_id=<uuid32>` immediately after the `location=` field. Update any log parsers/ETL pipelines to accept the new token order: `...|method=GET|location=body|request_id=<uuid32>|payload=...` where `<uuid32>` is a dashless (32 lowercase hex) UUID v4.
-- Request ID format changed from a custom time/counter hex to a dashless UUID v4 (32 lowercase hex chars) to improve entropy and cross-system uniqueness.
-- Response correlation header renamed from `X-Request-ID` to `X-WAF-Request-ID` to reduce collision risk with upstream or existing infrastructure headers.
-
 #### Changed
 
 - `FileUploadDecision` enum variants `Block` and `Log` now carry an `Option<String>` with the originating filename. Existing code matching on `Block(reason)` must be updated to `Block(reason, _)`.
