@@ -125,6 +125,18 @@ routes:
       rfi: false
       lfi: false
       file_upload: false
+
+pre_filter:
+  enabled: true
+  max_sample_bytes: 4096
+  plugins:
+    sqli: true
+    xss: true
+    rfi: true
+    lfi: true
+    cmdi: true
+    path_traversal: true
+
 # SQL Injection Protection
 sqli_protection:
   enabled: true # Enable/disable SQL injection protection

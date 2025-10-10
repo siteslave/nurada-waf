@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.1.6] - 2025-10-10
+
+### WAF-CORE
+
+#### Added
+
+- Pre-filter gains a dedicated Path Traversal category, adds richer logging around matched indicators, and expands pattern coverage for encoded payloads.
+- Reference configurations (`config.yaml`, `docker/config.docker.yaml`) now ship with default `pre_filter` sections showcasing the new per-plugin gating layout.
+
+#### Changed
+
+- Reworked `pre_filter` configuration to remove global risk thresholds in favor of per-plugin boolean toggles. Each plugin now defaults to `false` (always run) unless explicitly gated with `true`, requiring a corresponding pre-filter score of at least 1.
+- Updated README documentation to explain the revised gating behavior and default semantics.
+- Refreshed unit tests covering pre-filter gating to align with the new boolean-driven workflow.
+
+### WAF-API
+
+#### Added
+
+- Config: Introduced `pre_filter.plugins` boolean toggles for `sqli`, `xss`, `rfi`, `lfi`, `cmdi`, and `path_traversal`.
+
+#### Changed
+
+- Config: Deprecated `pre_filter.risk_threshold` and `pre_filter.thresholds.*`; the section now stores plugin toggles with defaults `false`.
+
+#### Fixed
+
+- API: `/api/config/pre_filter` GET/POST now reflects the new schema and defaults to disabled plugins unless explicitly enabled.
+
+#### WAF-UI
+
+#### Added
+
+- Settings: new "Pre-filtering & Payload Triage" subpage to tune plugin gating and payload sampling prior to inspection.
+
 ## [0.1.5] - 2025-10-09
 
 ### WAF-CORE
