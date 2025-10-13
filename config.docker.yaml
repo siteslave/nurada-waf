@@ -94,7 +94,26 @@ upstreams:
       idle_timeout_secs: 60
       verify_cert: false
       verify_hostname: false
-
+  - name: wafapi
+    address: 172.25.0.11:8082
+    peer_options:
+      connection_timeout_secs: 60
+      total_connection_timeout_secs: 0
+      read_timeout_secs: 30
+      write_timeout_secs: 30
+      idle_timeout_secs: 60
+      verify_hostname: false
+      verify_cert: false
+  - name: wafui
+    address: 172.25.0.12:80
+    peer_options:
+      connection_timeout_secs: 60
+      total_connection_timeout_secs: 0
+      read_timeout_secs: 30
+      write_timeout_secs: 30
+      idle_timeout_secs: 60
+      verify_hostname: false
+      verify_cert: false
 routes:
   - path: /api/*
     upstream: backend1
@@ -112,9 +131,14 @@ routes:
       max_requests: 60
       window_secs: 60
       block_duration_secs: 600
-  - path: /static/*
-    upstream: backend2
-    strip_prefix: true # ตัด /static/ ออก
+  - path: /manager/api/*
+    upstream: wafapi
+    strip_prefix: false
+    rate_limit:
+      enabled: true
+      max_requests: 200
+      window_secs: 60
+      block_duration_secs: 600
     plugins:
       xss: false
       sqli: false
@@ -125,7 +149,28 @@ routes:
       rfi: false
       lfi: false
       file_upload: false
-
+    geoip_countries: []
+    hosts: []
+  - path: /manager/ui/*
+    upstream: wafui
+    strip_prefix: false
+    rate_limit:
+      enabled: true
+      max_requests: 200
+      window_secs: 60
+      block_duration_secs: 600
+    plugins:
+      xss: false
+      sqli: false
+      path_traversal: false
+      cmdi: false
+      user_agent_filter: false
+      geoip: false
+      rfi: false
+      lfi: false
+      file_upload: false
+    geoip_countries: []
+    hosts: []
 pre_filter:
   enabled: true
   max_sample_bytes: 4096
