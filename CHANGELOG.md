@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.7] - 2025-10-13
+
+### WAF-UI
+
+#### Changed
+
+- Build: set Vite `base` to `./` so generated assets resolve via relative paths.
+
 ## [0.1.6] - 2025-10-10
 
 ### WAF-CORE

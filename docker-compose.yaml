@@ -14,6 +14,9 @@ services:
       - "8080:8080" # HTTP (if TLS disabled)
       - "9443:9443" # HTTPS (when enabled in config)
     restart: unless-stopped
+    networks:
+      waf_internal:
+        ipv4_address: 172.25.0.10
 
   wafui:
     image: siteslave/waf-ui:latest
@@ -27,6 +30,9 @@ services:
     depends_on:
       - wafapi
       - wafcore
+    networks:
+      waf_internal:
+        ipv4_address: 172.25.0.12
   wafapi:
     image: siteslave/waf-api:latest
     container_name: waf-api
@@ -43,3 +49,13 @@ services:
     depends_on:
       - wafcore
     restart: unless-stopped
+    networks:
+      waf_internal:
+        ipv4_address: 172.25.0.11
+
+networks:
+  waf_internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24
