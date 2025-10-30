@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.1.8] - 2025-10-30
+
+### WAF-UI
+
+#### Changed
+
+- แก้ไขข้อผิดพลาดกรณีเพิ่ม routes.path ซ้ำกันแต่คนละ host
+
+### WAF-API
+
+#### Changed
+
+- ปรับปรุง `config.yaml` โดยเพิ่มคีย์ `id` เพื่อให้สามารถเพิ่ม routes.path ที่มีชื่อซ้ำกันแต่อยู่คนละ host
+
+```yaml
+...
+- path: /api/*
+  id: bd5d7858-1425-437a-a29d-d6885212b87c
+  upstream: myapi
+...
+```
+
+*** แก้ไขไฟล์ `config.yaml` โดยการเพิ่มคีย์ `id` และใส่ค่าเป็น `uuid` ที่ไม่ซ้ำกัน ก่อนการใช้งาน ***
+
 ## [0.1.7] - 2025-10-13
 
 ### WAF-UI
@@ -140,7 +164,7 @@
 - Previous mixed token forms (e.g., `SQLI_DETECTED|`, `XSS_DETECTED|`, `UA_BLOCK|`, `IP_BLACKLISTED|`) are no longer tallied for new statistics calculations; ensure log emitter conforms to new format for accurate counts.
 - Unified token tests added for CMDI, PATH_TRAVERSAL, USER_AGENT, and IP_FILTER to validate parsing logic.
 
-### WAF-UI 
+### WAF-UI
 
 - Update Sidebar menu
 - Add icon on page title

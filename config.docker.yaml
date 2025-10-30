@@ -116,6 +116,7 @@ upstreams:
       verify_cert: false
 routes:
   - path: /api/*
+    id: f9bceb53-b878-4997-be73-16038f258d00
     upstream: backend1
     strip_prefix: true
     plugins:
@@ -132,6 +133,7 @@ routes:
       window_secs: 60
       block_duration_secs: 600
   - path: /manager/api/*
+    id: bd5d7858-1425-437a-a29d-d6885212b87c
     upstream: wafapi
     strip_prefix: false
     rate_limit:
@@ -152,6 +154,7 @@ routes:
     geoip_countries: []
     hosts: []
   - path: /manager/ui/*
+    id: 0ff7f310-faf6-46d0-8ba3-36e761d19beb
     upstream: wafui
     strip_prefix: false
     rate_limit:
@@ -392,27 +395,7 @@ file_upload_protection:
   max_files: 10 # Prevent excessive part counts
   allowed_extensions: [jpg, jpeg, png, gif, pdf, xlsx, xls, docx, txt]
   blocked_extensions:
-    [
-      php,
-      php5,
-      phtml,
-      jsp,
-      asp,
-      aspx,
-      exe,
-      dll,
-      sh,
-      bash,
-      bat,
-      cmd,
-      ps1,
-      cgi,
-      pl,
-      rb,
-      jar,
-      war,
-      class,
-    ]
+    [php, php5, phtml, jsp, asp, aspx, exe, dll, sh, bash, bat, cmd, ps1, cgi, pl, rb, jar, war, class]
   inspect_magic: true # Enable signature/magic byte inspection
   # Available magic type identifiers (add to list to enforce):
   #   php, elf, pe, jar, class, script, pdf, png, zip
