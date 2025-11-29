@@ -1,5 +1,54 @@
 # Changelog
 
+## [0.1.9] - 2025-11-29
+
+### WAF-CORE
+
+#### Changed
+
+- SQLi protection API configuration restructured: `api_url` and `api_token` are now nested under `sqli_protection.api.id` and `sqli_protection.api.token`.
+- SQLi API authentication changed from Bearer token to `X-API-Key` custom header.
+- SQLi API response format updated to use `decision` field (`"BLOCK"` / `"ALLOW"`) instead of `confidence_threshold`.
+- Added AI model provider system with ID-based endpoint resolution: providers are defined with `id`, `model_name`, `version`, `date_added`, `status`, `endpoint`, and `health_check` fields.
+- Removed `confidence_threshold` configuration from SQLi protection; blocking decisions are now driven entirely by the API's `decision` response field.
+- Removed `api_health_url` configuration; health check endpoint is now resolved from the provider definition.
+- Telegram alerting: Changed from MarkdownV2 to plain text format with emoji decorations for improved readability and compatibility. Removed `parse_mode` from API calls to avoid escape character issues (`\`, `*`) in messages.
+- Alerting configuration now logs `ALERTING_CONFIG|enabled=...|mode=...|channels=...` at startup for easier debugging of alert mode (immediate vs aggregate).
+
+#### Fixed
+
+- Syslog RFC 3164 format: Removed extraneous space after PRI field (`<priority>`) that could cause parsing failures on strict syslog servers. Format now correctly follows `<PRI>TIMESTAMP HOSTNAME APP[PID]: MESSAGE`.
+- Syslog error handling: Added explicit error logging (`[SYSLOG_ERROR]`) when UDP send fails, replacing silent error swallowing with `let _ =`.
+- Syslog initialization: Added info-level log message when syslog appender successfully initializes, confirming server address and facility configuration.
+- Removed unused `escape_markdown()` function that was previously used for Telegram MarkdownV2 formatting.
+
+### WAF-UI
+
+#### Added
+
+- Reverse Proxy: scrollable tables for Upstreams and Routes with sticky headers when list grows large (`max-h-[32rem]`).
+
+#### Changed
+
+- SQL Injection (API mode): migrated to new nested `api: { id, token }` response format.
+- SQL Injection (API mode): removed `confidence_threshold` field (no longer used by API).
+- SQL Injection (API mode): added token visibility toggle (show/hide password).
+- SQL Injection (API mode): added Health Check button with dialog showing API provider status, response time, and details.
+- SQL Injection (API mode): health check timestamps display in Asia/Bangkok timezone.
+- SQL Injection (API mode): reorganized layout - AI Model, Token, and Health Check in 3-column row.
+
+### WAF-API
+
+#### Added
+
+- API: Added `GET /api/ai/providers/health/{id}` endpoint to check health status of a specific AI model provider by ID.
+
+#### Removed
+
+- Config: Removed `sqli_protection.confidence_threshold` field from configuration schema.
+- Security: Removed AES-256-GCM token encryption feature (`crypto` module and `token_crypto` CLI tool).
+
+
 ## [0.1.8] - 2025-10-30
 
 ### WAF-UI

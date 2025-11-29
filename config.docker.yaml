@@ -191,10 +191,10 @@ sqli_protection:
   protection_mode: "manual" # Protection mode: "api" or "manual"
 
   # API mode settings (used when detection_mode = "api")
-  api_url: "http://localhost:8002/predict" # SQLi detection API endpoint
-  api_token: "waf-YOU-TOKEN-KEY-HERE" # API authentication token
+  api:
+    id: xxxxxxxxxx
+    token: waf_<your_api_token_here>
   timeout_secs: 5 # API request timeout in seconds
-  confidence_threshold: 0.7 # Confidence threshold (0.0-1.0) for blocking
   max_concurrent_api_requests: 8 # Limit concurrent API calls (0 = unlimited)
   api_error_threshold: 5 # Consecutive API failures before opening circuit breaker (0 = disable)
   api_cooldown_secs: 30 # Seconds to wait before retrying after the circuit opens
@@ -395,7 +395,27 @@ file_upload_protection:
   max_files: 10 # Prevent excessive part counts
   allowed_extensions: [jpg, jpeg, png, gif, pdf, xlsx, xls, docx, txt]
   blocked_extensions:
-    [php, php5, phtml, jsp, asp, aspx, exe, dll, sh, bash, bat, cmd, ps1, cgi, pl, rb, jar, war, class]
+    [
+      php,
+      php5,
+      phtml,
+      jsp,
+      asp,
+      aspx,
+      exe,
+      dll,
+      sh,
+      bash,
+      bat,
+      cmd,
+      ps1,
+      cgi,
+      pl,
+      rb,
+      jar,
+      war,
+      class,
+    ]
   inspect_magic: true # Enable signature/magic byte inspection
   # Available magic type identifiers (add to list to enforce):
   #   php, elf, pe, jar, class, script, pdf, png, zip
